@@ -14,7 +14,10 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
     val uiState: State<WeatherUiState> = _uiState
 
     fun fetchWeather(city: String, apiKey: String) {
-        if (city.isBlank()) return
+
+        if (city.isBlank()) {
+            return
+        }
 
         viewModelScope.launch {
             _uiState.value = WeatherUiState.Loading

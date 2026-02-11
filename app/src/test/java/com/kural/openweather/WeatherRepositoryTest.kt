@@ -1,7 +1,10 @@
 package com.kural.openweather
 
+import com.kural.openweather.data.Main
+import com.kural.openweather.data.Sys
+import com.kural.openweather.data.WeatherResponse
+import com.kural.openweather.data.Wind
 import com.kural.openweather.networking.WeatherRepository
-import com.kural.openweather.networking.WeatherResponse
 import com.kural.openweather.networking.WeatherService
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -25,11 +28,10 @@ class WeatherRepositoryTest {
         MockitoAnnotations.openMocks(this)
         repository = WeatherRepository(weatherService)
     }
-
+    val apiKey = BuildConfig.OPEN_WEATHER_API_KEY
     @Test
     fun `getCurrentWeather appends US suffix when not present`() = runTest {
         val city = "New York"
-        val apiKey = "test_key"
         val mockResponse = mockWeatherResponse("New York")
         
         `when`(weatherService.getCurrentWeather(eq("New York,US"), eq(apiKey), any())).thenReturn(mockResponse)
@@ -42,7 +44,6 @@ class WeatherRepositoryTest {
     @Test
     fun `getCurrentWeather does not append US suffix when already present`() = runTest {
         val city = "Miami,US"
-        val apiKey = "test_key"
         val mockResponse = mockWeatherResponse("Miami")
 
         `when`(weatherService.getCurrentWeather(eq("Miami,US"), eq(apiKey), any())).thenReturn(mockResponse)
@@ -54,11 +55,11 @@ class WeatherRepositoryTest {
 
     private fun mockWeatherResponse(name: String): WeatherResponse {
         return WeatherResponse(
-            main = com.kural.openweather.networking.Main(0.0, 0.0, 0.0, 0.0, 0, 0),
+            main = Main(0.0, 0.0, 0.0, 0.0, 0, 0),
             name = name,
             weather = emptyList(),
-            wind = com.kural.openweather.networking.Wind(0.0, 0),
-            sys = com.kural.openweather.networking.Sys("US")
+            wind = Wind(0.0, 0),
+            sys = Sys("US")
         )
     }
 }

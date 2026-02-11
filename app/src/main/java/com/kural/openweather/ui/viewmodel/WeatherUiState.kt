@@ -1,6 +1,6 @@
 package com.kural.openweather.ui.viewmodel
 
-import com.kural.openweather.networking.WeatherResponse
+import com.kural.openweather.data.WeatherResponse
 
 sealed class WeatherUiState {
     object Idle : WeatherUiState()

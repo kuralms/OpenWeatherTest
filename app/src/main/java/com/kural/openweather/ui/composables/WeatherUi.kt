@@ -17,17 +17,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.kural.openweather.networking.WeatherResponse
+import com.kural.openweather.BuildConfig
+import com.kural.openweather.data.AppCache
+import com.kural.openweather.data.WeatherResponse
 import com.kural.openweather.ui.viewmodel.WeatherUiState
 import com.kural.openweather.ui.viewmodel.WeatherViewModel
+import kotlinx.coroutines.launch
 
+lateinit var appCache : AppCache
 
 @Composable
 fun WeatherScreen(
@@ -35,10 +42,16 @@ fun WeatherScreen(
     modifier: Modifier = Modifier
 ) {
     var cityInput by remember { mutableStateOf("") }
+    val composableScope = rememberCoroutineScope()
     val uiState by viewModel.uiState
 
-    // Using the provided API key move this to gradle to be used on build flavors
-    val apiKey = "143b52bf7bbc806159b27ec0861117e6"
+    if(cityInput.isEmpty()) {
+        appCache = AppCache(LocalContext.current)
+        val getCity by appCache.getCity.collectAsState("")
+        if(getCity.isNotEmpty()) {
+            cityInput = getCity
+        }
+    }
 
     Column(
         modifier = modifier
@@ -47,6 +60,7 @@ fun WeatherScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
+        Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = cityInput,
             onValueChange = { cityInput = it },
@@ -56,7 +70,7 @@ fun WeatherScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = { viewModel.fetchWeather(cityInput, apiKey) },
+            onClick = { viewModel.fetchWeather(cityInput, BuildConfig.OPEN_WEATHER_API_KEY) },
             modifier = Modifier.fillMaxWidth(),
             enabled = uiState !is WeatherUiState.Loading
         ) {
@@ -78,11 +92,15 @@ fun WeatherScreen(
             }
             is WeatherUiState.Success -> {
                 WeatherCard(state.weather)
+                composableScope.launch {
+                    appCache.setCity(cityInput)
+                }
             }
             WeatherUiState.Idle -> {
                 Text("Enter a city to see the weather")
             }
         }
+
     }
 }
 
@@ -121,7 +139,6 @@ fun WeatherCard(weather: WeatherResponse) {
                 WeatherDetailItem("Humidity", "${weather.main.humidity}%")
                 WeatherDetailItem("Wind", "${weather.wind.speed.toInt()} mph")
             }
-
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
@@ -133,6 +150,7 @@ fun WeatherCard(weather: WeatherResponse) {
                 WeatherDetailItem("Pressure", "${weather.main.pressure} hPa")
             }
         }
+        TimeStampView()
     }
 }
 
