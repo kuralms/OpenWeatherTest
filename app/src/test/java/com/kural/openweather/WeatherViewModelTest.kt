@@ -1,10 +1,10 @@
 package com.kural.openweather
 
-import com.kural.openweather.networking.Main
-import com.kural.openweather.networking.Sys
+import com.kural.openweather.data.Main
+import com.kural.openweather.data.Sys
+import com.kural.openweather.data.WeatherResponse
+import com.kural.openweather.data.Wind
 import com.kural.openweather.networking.WeatherRepository
-import com.kural.openweather.networking.WeatherResponse
-import com.kural.openweather.networking.Wind
 import com.kural.openweather.ui.viewmodel.WeatherUiState
 import com.kural.openweather.ui.viewmodel.WeatherViewModel
 import kotlinx.coroutines.Dispatchers
